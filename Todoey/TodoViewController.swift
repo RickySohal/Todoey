@@ -11,9 +11,14 @@ import UIKit
 class TodoViewController: UITableViewController {
     
     var listArray = ["Iphone", "Android" , "Windows"]
+    var userDefault = UserDefaults.standard
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        if let list = UserDefaults.standard.array(forKey: "Array"){
+            
+            listArray = list as! [String]
+        }
         // Do any additional setup after loading the view.
     }
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -36,7 +41,7 @@ class TodoViewController: UITableViewController {
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    // ADD - Item
+    // ADD: - Item - BarButton Pressed
     
     @IBAction func barButtonPressed(_ sender: UIBarButtonItem) {
         
@@ -46,6 +51,7 @@ class TodoViewController: UITableViewController {
         
         let action = UIAlertAction(title: "Add", style: .default) { (action) in
             self.listArray.append(textField.text!)
+            self.userDefault.set(self.listArray, forKey: "Array")
             self.tableView.reloadData()
         }
         alert.addTextField { (uiTextField) in
