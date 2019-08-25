@@ -11,29 +11,12 @@ import UIKit
 class TodoViewController: UITableViewController {
     
     var listArray = [Item]()
-    var userDefault = UserDefaults.standard
+    let dataFile = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("items.plist")
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        loadItems()
         
-        
-        let newItem = Item()
-        newItem.itemName = "Iphone"
-        listArray.append(newItem)
-
-        let newItem2 = Item()
-        newItem.itemName = "Android"
-        listArray.append(newItem2)
-
-        let newItem3 = Item()
-        newItem.itemName = "Windows"
-        listArray.append(newItem3)
-        
-        
-        if let list = UserDefaults.standard.array(forKey: "Array") as? [Item] {
-
-            listArray = list
-        }
          //Do any additional setup after loading the view.
         
     }
@@ -53,8 +36,7 @@ class TodoViewController: UITableViewController {
         
         let item = listArray[indexPath.row]
         item.checked = !item.checked
-        tableView.reloadData()
-        
+        self.saveItems()
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
@@ -63,16 +45,13 @@ class TodoViewController: UITableViewController {
     @IBAction func barButtonPressed(_ sender: UIBarButtonItem) {
         
         var textField = UITextField()
-
         let alert = UIAlertController(title: "Add Item", message: "Please enter the name of the item", preferredStyle: .alert)
-
         let action = UIAlertAction(title: "Add", style: .default) { (action) in
             
             let newItem = Item()
             newItem.itemName = textField.text!
             self.listArray.append(newItem)
-            //self.userDefault.set(self.listArray, forKey: "Array")
-            self.tableView.reloadData()
+            self.saveItems()
         }
         alert.addTextField { (uiTextField) in
             //code
@@ -81,6 +60,42 @@ class TodoViewController: UITableViewController {
         }
         alert.addAction(action)
         present(alert, animated: true, completion: nil)
+    }
+    
+    
+    // Function for saving all items from tableView to the custom plist
+    
+    
+    func saveItems(){
+        
+        let encoder = PropertyListEncoder()
+        do {
+            let data = try encoder.encode(self.listArray)
+            try data.write(to: self.dataFile!)
+            tableView.reloadData()
+        }
+        catch{
+            print ("Error was there in printing " + "\(error)")
+            
+        }
+        
+    }
+    
+    // Function for loading all items from custom plist file to the tableView
+    
+    
+    func loadItems(){
+        let decoder = PropertyListDecoder()
+        do {
+            let data = try Data(contentsOf: dataFile!)
+            listArray = try decoder.decode([Item].self, from: data)
+            tableView.reloadData()
+        }
+        catch{
+            print ("Error was there in printing " + "\(error)")
+            
+        }
+        
     }
     
 
